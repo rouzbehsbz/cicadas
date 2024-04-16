@@ -18,6 +18,7 @@ pub struct Arguments {
     method: Method,
     proxy: Option<String>,
     duration: u32,
+    connections: u32,
     payload: Option<String>,
     output: Option<PathBuf>,
     headers: Option<HeaderMap>,
@@ -56,6 +57,13 @@ impl Parser {
             .arg(
                 arg!(
                     -d --duration <duration> "Load test duration in seconds"
+                )
+                .required(true)
+                .value_parser(value_parser!(u32)),
+            )
+            .arg(
+                arg!(
+                    -c --connections <connections> "Connections count to open and map with OS threads"
                 )
                 .required(true)
                 .value_parser(value_parser!(u32)),
@@ -132,6 +140,11 @@ impl Parser {
             None => None,
         };
         let duration = self.matches.get_one::<u32>("duration").unwrap().to_owned();
+        let connections = self
+            .matches
+            .get_one::<u32>("connections")
+            .unwrap()
+            .to_owned();
         let payload = match self.matches.get_one::<String>("payload").to_owned() {
             Some(payload) => Some(payload.to_owned()),
             None => None,
@@ -155,6 +168,7 @@ impl Parser {
             method,
             proxy,
             duration,
+            connections,
             payload,
             output,
             headers,

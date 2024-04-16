@@ -1,10 +1,6 @@
 use std::time::Duration;
 
-use reqwest::{
-    blocking::Response,
-    header::{HeaderMap, HeaderName},
-    Method, Proxy, Result,
-};
+use reqwest::{blocking::Response, Method, Proxy, Result};
 
 use crate::parser::Arguments;
 

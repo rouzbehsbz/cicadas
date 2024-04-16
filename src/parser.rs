@@ -1,27 +1,21 @@
-use clap::{arg, command, error::Result, value_parser, ArgMatches, Error, ValueEnum};
-use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
+use clap::{arg, command, error::Result, value_parser, ArgMatches, Error};
+use reqwest::{
+    header::{HeaderMap, HeaderName, HeaderValue},
+    Method,
+};
 use std::path::PathBuf;
-
-#[derive(Debug, Clone, ValueEnum)]
-pub enum Method {
-    GET,
-    POST,
-    DELETE,
-    PUT,
-    OPTIONS,
-    HEAD,
-}
 
 #[derive(Debug)]
 pub struct Arguments {
-    target: String,
-    method: Method,
-    proxy: Option<String>,
-    duration: u32,
-    connections: u32,
-    payload: Option<String>,
-    output: Option<PathBuf>,
-    headers: Option<HeaderMap>,
+    pub target: String,
+    pub method: Method,
+    pub proxy: Option<String>,
+    pub duration: u64,
+    pub connections: u32,
+    pub payload: Option<String>,
+    pub output: Option<PathBuf>,
+    pub headers: Option<HeaderMap>,
+    pub timeout: u64,
 }
 
 pub struct Parser {
@@ -59,7 +53,7 @@ impl Parser {
                     -d --duration <duration> "Load test duration in seconds"
                 )
                 .required(true)
-                .value_parser(value_parser!(u32)),
+                .value_parser(value_parser!(u64)),
             )
             .arg(
                 arg!(
@@ -89,6 +83,14 @@ impl Parser {
                 .num_args(0..=255)
                 .required(false)
                 .value_parser(value_parser!(String)),
+            )
+            .arg(
+                arg!(
+                    -T --timeout <timeout> "Optional HTTP request timeout duration in seconds"
+                )
+                .required(false)
+                .default_value("5")
+                .value_parser(value_parser!(u64)),
             )
             .get_matches();
 
@@ -139,7 +141,8 @@ impl Parser {
             Some(proxy) => Some(proxy.to_owned()),
             None => None,
         };
-        let duration = self.matches.get_one::<u32>("duration").unwrap().to_owned();
+        let duration = self.matches.get_one::<u64>("duration").unwrap().to_owned();
+        let timeout = self.matches.get_one::<u64>("timeout").unwrap().to_owned();
         let connections = self
             .matches
             .get_one::<u32>("connections")
@@ -172,6 +175,7 @@ impl Parser {
             payload,
             output,
             headers,
+            timeout,
         })
     }
 }

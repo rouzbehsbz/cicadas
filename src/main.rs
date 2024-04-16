@@ -1,11 +1,15 @@
+use clap::error::Result;
 use parser::Parser;
 
 mod parser;
 
-fn main() {
+//TODO: need to handle errors just like clap
+fn main() -> Result<()> {
     let parser = Parser::new();
-    //TODO: need to handle errors just like clap
-    let arguments = parser.get_arguments().map_err(|err| err.render());
 
-    println!("{:?}", arguments)
+    let arguments = parser.get_arguments()?;
+
+    println!("{:?}", arguments);
+
+    Ok(())
 }

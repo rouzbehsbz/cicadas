@@ -88,20 +88,24 @@ impl Parser {
         Self { matches }
     }
 
-    pub fn parse_headers(headers: Vec<String>) -> Headers {
+    pub fn parse_headers(headers: Vec<String>) -> Result<Headers> {
         let mut parsed_headers = Vec::with_capacity(headers.len());
 
         for header in headers {
             let splitted_header: Vec<&str> = header.split(':').collect();
 
-            //TODO: handle error for out of bound indexes
+            //TODO: maybe can do better error handling with clap
+            if splitted_header.len() != 2 {
+                return Err(Error::new(clap::error::ErrorKind::InvalidValue));
+            }
+
             parsed_headers.push([
                 splitted_header[0].to_string(),
                 splitted_header[1].to_string(),
             ])
         }
 
-        parsed_headers
+        Ok(parsed_headers)
     }
 
     pub fn parse_method(method: String) -> Result<Method> {
@@ -114,6 +118,7 @@ impl Parser {
             "DELETE" => Ok(Method::DELETE),
             "HEAD" => Ok(Method::HEAD),
             "OPTIONS" => Ok(Method::OPTIONS),
+            //TODO: maybe can do better error handling with clap
             _ => Err(Error::new(clap::error::ErrorKind::InvalidValue)),
         }
     }
@@ -143,7 +148,7 @@ impl Parser {
             }
             None => Vec::with_capacity(0),
         };
-        let headers = Self::parse_headers(raw_headers);
+        let headers = Self::parse_headers(raw_headers)?;
 
         Ok(Arguments {
             target,

@@ -1,7 +1,6 @@
 use clap::{arg, command, error::Result, value_parser, ArgMatches, Error, ValueEnum};
+use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
 use std::path::PathBuf;
-
-pub type Headers = Vec<[String; 2]>;
 
 #[derive(Debug, Clone, ValueEnum)]
 pub enum Method {
@@ -21,7 +20,7 @@ pub struct Arguments {
     duration: u32,
     payload: Option<String>,
     output: Option<PathBuf>,
-    headers: Headers,
+    headers: Option<HeaderMap>,
 }
 
 pub struct Parser {
@@ -88,8 +87,8 @@ impl Parser {
         Self { matches }
     }
 
-    pub fn parse_headers(headers: Vec<String>) -> Result<Headers> {
-        let mut parsed_headers = Vec::with_capacity(headers.len());
+    pub fn parse_headers(headers: Vec<String>) -> Result<Option<HeaderMap>> {
+        let mut headers_map = HeaderMap::with_capacity(headers.len());
 
         for header in headers {
             let splitted_header: Vec<&str> = header.split(':').collect();
@@ -99,13 +98,14 @@ impl Parser {
                 return Err(Error::new(clap::error::ErrorKind::InvalidValue));
             }
 
-            parsed_headers.push([
-                splitted_header[0].to_string(),
-                splitted_header[1].to_string(),
-            ])
+            //TODO: handle errors here
+            let key: HeaderName = splitted_header[0].parse().unwrap();
+            let value: HeaderValue = splitted_header[1].parse().unwrap();
+
+            headers_map.insert(key, value);
         }
 
-        Ok(parsed_headers)
+        Ok(Some(headers_map))
     }
 
     pub fn parse_method(method: String) -> Result<Method> {

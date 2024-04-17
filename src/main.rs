@@ -1,15 +1,18 @@
+use crate::{http::HttpClientBlocking, pool::ThreadPool};
+use http::StatusCodeCategory;
+use logger::Logger;
+use parser::Parser;
 use std::{
-    sync::{Arc, Mutex},
+    sync::Arc,
     time::{Duration, Instant},
 };
-
-use parser::Parser;
-
-use crate::{http::HttpClientBlocking, pool::ThreadPool};
+use storage::Storage;
 
 mod http;
+mod logger;
 mod parser;
 mod pool;
+mod storage;
 
 //TODO: need to handle errors just like clap
 fn main() {
@@ -17,27 +20,29 @@ fn main() {
     let mut thread_pool = ThreadPool::new();
     let arguments = parser.get_arguments().unwrap();
     let http_client = HttpClientBlocking::from_arguments(&arguments).unwrap();
-    let responses = Arc::new(Mutex::new(Vec::new()));
-    let timeouts = Arc::new(Mutex::new(Vec::new()));
+    let storage = Arc::new(Storage::new());
+
+    Logger::start();
 
     for _ in 0..arguments.connections {
         let http_client = http_client.clone();
-        let responses = responses.clone();
-        let timeouts = timeouts.clone();
+        let storage = storage.clone();
 
         thread_pool.add(Box::new(move || {
             let start_time = Instant::now();
 
             loop {
-                let end_time = Instant::now();
-                let elapsed_time = end_time - start_time;
+                let elapsed_time = Instant::now() - start_time;
 
                 if elapsed_time < Duration::from_secs(arguments.duration) {
-                    if let Ok(response) = http_client.call() {
-                        //TODO: Make sure proper error handling implemented here
-                        responses.lock().unwrap().push(response);
+                    let response_start_time = Instant::now();
+                    let response = http_client.call();
+                    let elapsed_response_time = Instant::now() - response_start_time;
+
+                    if let Ok(response) = response {
+                        storage.add_response_time(response.status().into(), elapsed_response_time)
                     } else {
-                        timeouts.lock().unwrap().push(0);
+                        storage.add_response_time(StatusCodeCategory::Failed, elapsed_response_time)
                     }
                 } else {
                     break;
@@ -48,6 +53,5 @@ fn main() {
 
     ThreadPool::wait_execution(thread_pool);
 
-    println!("{:?}", responses.lock().unwrap().len());
-    println!("{:?}", timeouts.lock().unwrap().len())
+    Logger::show_results(storage, arguments.duration);
 }

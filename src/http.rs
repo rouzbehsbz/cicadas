@@ -1,8 +1,34 @@
 use std::time::Duration;
 
-use reqwest::{blocking::Response, Method, Proxy, Result};
+use reqwest::{blocking::Response, Method, Proxy, Result, StatusCode};
 
 use crate::parser::Arguments;
+
+#[derive(PartialEq, Eq, Hash)]
+pub enum StatusCodeCategory {
+    Success,
+    Redirection,
+    ClientError,
+    ServerError,
+    Informational,
+    Failed,
+}
+
+impl From<StatusCode> for StatusCodeCategory {
+    fn from(value: StatusCode) -> Self {
+        if value.is_success() {
+            Self::Success
+        } else if value.is_redirection() {
+            Self::Redirection
+        } else if value.is_client_error() {
+            Self::ClientError
+        } else if value.is_server_error() {
+            Self::ServerError
+        } else {
+            Self::Informational
+        }
+    }
+}
 
 #[derive(Clone)]
 pub struct HttpClientBlocking {

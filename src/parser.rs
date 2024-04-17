@@ -11,7 +11,7 @@ pub struct Arguments {
     pub method: Method,
     pub proxy: Option<String>,
     pub duration: u64,
-    pub connections: u32,
+    pub connections: usize,
     pub payload: Option<String>,
     pub output: Option<PathBuf>,
     pub headers: Option<HeaderMap>,
@@ -60,7 +60,7 @@ impl Parser {
                     -c --connections <connections> "Connections count to open and map with OS threads"
                 )
                 .required(true)
-                .value_parser(value_parser!(u32)),
+                .value_parser(value_parser!(usize)),
             )
             .arg(
                 arg!(
@@ -145,7 +145,7 @@ impl Parser {
         let timeout = self.matches.get_one::<u64>("timeout").unwrap().to_owned();
         let connections = self
             .matches
-            .get_one::<u32>("connections")
+            .get_one::<usize>("connections")
             .unwrap()
             .to_owned();
         let payload = match self.matches.get_one::<String>("payload").to_owned() {

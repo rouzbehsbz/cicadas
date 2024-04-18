@@ -26,7 +26,7 @@ pub struct App {
 impl App {
     pub fn new() -> Self {
         let command = command!()
-            .about("Cicadas is a fast multi threaded HTTP load testing tool.")
+            .about("Cicadas is a fast multi threaded HTTP load testing and benchmarking tool.")
             .version("1.0.0")
             .arg(
                 arg!(
@@ -37,7 +37,7 @@ impl App {
             )
             .arg(
                 arg!(
-                    -m --method <method> "HTTP method for load testing the target"
+                    -m --method <method> "HTTP method."
                 )
                 .required(true)
                 .value_parser(value_parser!(String)),
@@ -72,7 +72,7 @@ impl App {
             )
             .arg(
                 arg!(
-                    -H --headers <headers> "Optional HTTP headers for load testing the target"
+                    -H --headers <headers> "Optional HTTP headers"
                 )
                 .num_args(0..=255)
                 .required(false)
@@ -80,7 +80,7 @@ impl App {
             )
             .arg(
                 arg!(
-                    -T --timeout <timeout> "Optional HTTP request timeout duration in seconds"
+                    -T --timeout <timeout> "Optional request timeout duration in seconds"
                 )
                 .required(false)
                 .default_value("5")

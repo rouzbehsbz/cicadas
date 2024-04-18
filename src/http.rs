@@ -1,8 +1,11 @@
 use std::time::Duration;
 
-use reqwest::{blocking::Response, Method, Proxy, Result, StatusCode};
+use reqwest::{blocking::Response, Method, Proxy, StatusCode};
 
-use crate::parser::Arguments;
+use crate::{
+    errors::{AppResult, ErrorType},
+    parser::Arguments,
+};
 
 #[derive(PartialEq, Eq, Hash)]
 pub enum StatusCodeCategory {
@@ -39,11 +42,14 @@ pub struct HttpClientBlocking {
 }
 
 impl HttpClientBlocking {
-    pub fn from_arguments(arguments: &Arguments) -> Result<Self> {
+    pub fn from_arguments(arguments: &Arguments) -> AppResult<Self> {
         let mut client_builder = reqwest::blocking::ClientBuilder::new();
 
         if let Some(proxy_url) = &arguments.proxy {
-            client_builder = client_builder.proxy(Proxy::all(proxy_url)?);
+            client_builder = client_builder.proxy(match Proxy::all(proxy_url) {
+                Ok(proxy) => proxy,
+                Err(_) => return Err(ErrorType::InvalidProxy),
+            });
         }
         if let Some(headers) = &arguments.headers {
             client_builder = client_builder.default_headers(headers.clone());
@@ -52,7 +58,10 @@ impl HttpClientBlocking {
         client_builder = client_builder.timeout(Duration::from_secs(arguments.timeout));
         client_builder = client_builder.tcp_keepalive(Duration::from_secs(arguments.duration));
 
-        let client = client_builder.build()?;
+        let client = match client_builder.build() {
+            Ok(client) => client,
+            Err(_) => return Err(ErrorType::HttpClientBuildFailed),
+        };
 
         Ok(Self {
             client,
@@ -62,14 +71,17 @@ impl HttpClientBlocking {
         })
     }
 
-    pub fn call(&self) -> Result<Response> {
+    pub fn call(&self) -> AppResult<Response> {
         let mut request = self.client.request(self.method.clone(), self.url.clone());
 
         if let Some(payload) = &self.payload {
             request = request.body(payload.clone());
         }
 
-        let response = request.send()?;
+        let response = match request.send() {
+            Ok(response) => response,
+            Err(_) => return Err(ErrorType::HttpRequestFailed),
+        };
 
         Ok(response)
     }

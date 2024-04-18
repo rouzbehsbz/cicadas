@@ -1,9 +1,11 @@
 use std::thread::{self, JoinHandle};
 
-pub type Job = Box<dyn FnOnce() + Send + 'static>;
+use crate::errors::{AppResult, ErrorType};
+
+pub type Job = Box<dyn FnOnce() -> AppResult<()> + Send + 'static>;
 
 pub struct Worker {
-    thread: JoinHandle<()>,
+    thread: JoinHandle<AppResult<()>>,
 }
 
 impl Worker {
@@ -31,10 +33,14 @@ impl ThreadPool {
         self.workers.push(worker);
     }
 
-    pub fn wait_execution(pool: Self) {
+    pub fn wait_execution(pool: Self) -> AppResult<()> {
         for worker in pool.workers {
-            //TODO: Watch out errors here
-            worker.thread.join().unwrap();
+            match worker.thread.join() {
+                Ok(_) => {}
+                Err(_) => return Err(ErrorType::ThreadJoinFailed),
+            }
         }
+
+        Ok(())
     }
 }

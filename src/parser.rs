@@ -1,9 +1,11 @@
-use clap::{arg, command, error::Result, value_parser, ArgMatches, Error};
+use clap::{arg, command, value_parser, ArgMatches, Error};
 use reqwest::{
     header::{HeaderMap, HeaderName, HeaderValue},
     Method,
 };
 use std::path::PathBuf;
+
+use crate::errors::{AppResult, ErrorType};
 
 #[derive(Debug, Clone)]
 pub struct Arguments {
@@ -24,7 +26,7 @@ pub struct Parser {
 
 impl Parser {
     pub fn new() -> Self {
-        let matches = command!()
+        let command = command!()
             .about("Cicadas is a fast multi threaded HTTP load testing tool.")
             .version("1.0.0")
             .arg(
@@ -91,26 +93,33 @@ impl Parser {
                 .required(false)
                 .default_value("5")
                 .value_parser(value_parser!(u64)),
-            )
-            .get_matches();
+            );
 
-        Self { matches }
+        //TODO: pre construct errors here
+
+        Self {
+            matches: command.get_matches(),
+        }
     }
 
-    pub fn parse_headers(headers: Vec<String>) -> Result<Option<HeaderMap>> {
+    pub fn parse_headers(headers: Vec<String>) -> AppResult<Option<HeaderMap>> {
         let mut headers_map = HeaderMap::with_capacity(headers.len());
 
         for header in headers {
             let splitted_header: Vec<&str> = header.split(':').collect();
 
-            //TODO: maybe can do better error handling with clap
             if splitted_header.len() != 2 {
-                return Err(Error::new(clap::error::ErrorKind::InvalidValue));
+                return Err(ErrorType::InvalidHeaderStructure);
             }
 
-            //TODO: handle errors here
-            let key: HeaderName = splitted_header[0].parse().unwrap();
-            let value: HeaderValue = splitted_header[1].parse().unwrap();
+            let key: HeaderName = match splitted_header[0].parse() {
+                Ok(value) => value,
+                Err(_) => return Err(ErrorType::InvalidHeaderName),
+            };
+            let value: HeaderValue = match splitted_header[1].parse() {
+                Ok(value) => value,
+                Err(_) => return Err(ErrorType::InvalidHeaderValue),
+            };
 
             headers_map.insert(key, value);
         }
@@ -118,7 +127,7 @@ impl Parser {
         Ok(Some(headers_map))
     }
 
-    pub fn parse_method(method: String) -> Result<Method> {
+    pub fn parse_method(method: String) -> AppResult<Method> {
         let method = method.to_uppercase();
 
         match method.as_str() {
@@ -128,12 +137,11 @@ impl Parser {
             "DELETE" => Ok(Method::DELETE),
             "HEAD" => Ok(Method::HEAD),
             "OPTIONS" => Ok(Method::OPTIONS),
-            //TODO: maybe can do better error handling with clap
-            _ => Err(Error::new(clap::error::ErrorKind::InvalidValue)),
+            _ => Err(ErrorType::InvalidMethod),
         }
     }
 
-    pub fn get_arguments(&self) -> Result<Arguments> {
+    pub fn get_arguments(&self) -> AppResult<Arguments> {
         let target = self.matches.get_one::<String>("target").unwrap().to_owned();
         let raw_method = self.matches.get_one::<String>("method").unwrap().to_owned();
         let method = Self::parse_method(raw_method)?;

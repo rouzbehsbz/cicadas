@@ -3,8 +3,8 @@ use std::time::Duration;
 use reqwest::{blocking::Response, Method, Proxy, StatusCode};
 
 use crate::{
+    app::Arguments,
     errors::{AppResult, ErrorType},
-    parser::Arguments,
 };
 
 #[derive(PartialEq, Eq, Hash)]

@@ -1,4 +1,4 @@
-use clap::{arg, command, value_parser, ArgMatches, Error};
+use clap::{arg, command, value_parser, ArgMatches, Command};
 use reqwest::{
     header::{HeaderMap, HeaderName, HeaderValue},
     Method,
@@ -20,11 +20,12 @@ pub struct Arguments {
     pub timeout: u64,
 }
 
-pub struct Parser {
+pub struct App {
+    command: Command,
     matches: ArgMatches,
 }
 
-impl Parser {
+impl App {
     pub fn new() -> Self {
         let command = command!()
             .about("Cicadas is a fast multi threaded HTTP load testing tool.")
@@ -95,11 +96,16 @@ impl Parser {
                 .value_parser(value_parser!(u64)),
             );
 
-        //TODO: pre construct errors here
-
         Self {
+            command: command.clone(),
             matches: command.get_matches(),
         }
+    }
+
+    pub fn throw_error(&mut self, error_type: ErrorType) {
+        let (kind, message) = error_type.to_command_error();
+
+        self.command.error(kind, message).exit()
     }
 
     pub fn parse_headers(headers: Vec<String>) -> AppResult<Option<HeaderMap>> {

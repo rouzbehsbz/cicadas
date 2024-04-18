@@ -37,7 +37,7 @@ impl ThreadPool {
         for worker in pool.workers {
             match worker.thread.join() {
                 Ok(_) => {}
-                Err(_) => return Err(ErrorType::ThreadJoinFailed),
+                Err(_) => return Err(ErrorType::InvalidError),
             }
         }
 

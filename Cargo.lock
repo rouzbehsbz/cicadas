@@ -135,7 +135,6 @@ dependencies = [
  "clap",
  "prettytable-rs",
  "reqwest",
- "thiserror",
 ]
 
 [[package]]

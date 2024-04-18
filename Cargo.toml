@@ -9,4 +9,3 @@ edition = "2021"
 clap = { version = "4.5.4", features = ["derive", "cargo"] }
 prettytable-rs = "0.10.0"
 reqwest = { version = "0.12.3", features = ["blocking"] }
-thiserror = "1.0.58"

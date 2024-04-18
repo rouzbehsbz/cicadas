@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use prettytable::{row, Table};
 
-use crate::{errors::AppResult, http::StatusCodeCategory, parser::Arguments, storage::Storage};
+use crate::{app::Arguments, errors::AppResult, http::StatusCodeCategory, storage::Storage};
 
 pub struct Logger;
 

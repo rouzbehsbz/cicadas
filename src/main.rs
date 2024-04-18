@@ -1,26 +1,33 @@
 use crate::{http::HttpClientBlocking, pool::ThreadPool};
+use app::App;
 use errors::AppResult;
 use http::StatusCodeCategory;
 use logger::Logger;
-use parser::Parser;
 use std::{
     sync::Arc,
     time::{Duration, Instant},
 };
 use storage::Storage;
 
+mod app;
 mod errors;
 mod http;
 mod logger;
-mod parser;
 mod pool;
 mod storage;
 
-//TODO: need to handle errors just like clap
-fn main() -> AppResult<()> {
-    let parser = Parser::new();
+fn main() {
+    let mut app = App::new();
+
+    match app_handler(&app) {
+        Ok(_) => {}
+        Err(error) => app.throw_error(error),
+    }
+}
+
+fn app_handler(app: &App) -> AppResult<()> {
     let mut thread_pool = ThreadPool::new();
-    let arguments = Arc::new(parser.get_arguments()?);
+    let arguments = Arc::new(app.get_arguments()?);
     let storage = Arc::new(Storage::new());
 
     for _ in 0..arguments.connections {
@@ -53,10 +60,10 @@ fn main() -> AppResult<()> {
         }));
     }
 
-    ThreadPool::wait_execution(thread_pool);
+    ThreadPool::wait_execution(thread_pool)?;
 
-    Logger::show_overview(&arguments, storage.clone());
-    Logger::show_results(storage);
+    Logger::show_overview(&arguments, storage.clone())?;
+    Logger::show_results(storage)?;
 
     Ok(())
 }

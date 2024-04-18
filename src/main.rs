@@ -53,4 +53,6 @@ fn main() {
 
     Logger::show_overview(&arguments, storage.clone());
     Logger::show_results(storage);
+
+    //TODO: application don't exit automatically
 }

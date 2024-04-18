@@ -3,7 +3,6 @@ use reqwest::{
     header::{HeaderMap, HeaderName, HeaderValue},
     Method,
 };
-use std::path::PathBuf;
 
 use crate::errors::{AppResult, ErrorType};
 
@@ -15,7 +14,6 @@ pub struct Arguments {
     pub duration: u64,
     pub connections: usize,
     pub payload: Option<String>,
-    pub output: Option<PathBuf>,
     pub headers: Option<HeaderMap>,
     pub timeout: u64,
 }
@@ -71,13 +69,6 @@ impl App {
                 )
                 .required(false)
                 .value_parser(value_parser!(String)),
-            )
-            .arg(
-                arg!(
-                    -o --output <output> "Optional file path to store target responses"
-                )
-                .required(false)
-                .value_parser(value_parser!(PathBuf)),
             )
             .arg(
                 arg!(
@@ -166,10 +157,6 @@ impl App {
             Some(payload) => Some(payload.to_owned()),
             None => None,
         };
-        let output = match self.matches.get_one::<PathBuf>("output").to_owned() {
-            Some(output) => Some(output.to_owned()),
-            None => None,
-        };
         let raw_headers: Vec<String> = match self.matches.get_many("headers") {
             Some(headers) => {
                 let headers: Vec<String> = headers.cloned().collect();
@@ -187,7 +174,6 @@ impl App {
             duration,
             connections,
             payload,
-            output,
             headers,
             timeout,
         })

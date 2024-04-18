@@ -18,21 +18,19 @@ mod storage;
 fn main() {
     let parser = Parser::new();
     let mut thread_pool = ThreadPool::new();
-    let arguments = parser.get_arguments().unwrap();
-    let http_client = HttpClientBlocking::from_arguments(&arguments).unwrap();
+    let arguments = Arc::new(parser.get_arguments().unwrap());
     let storage = Arc::new(Storage::new());
 
     for _ in 0..arguments.connections {
-        let http_client = http_client.clone();
         let storage = storage.clone();
+        let arguments = arguments.clone();
 
         thread_pool.add(Box::new(move || {
+            let http_client = HttpClientBlocking::from_arguments(&arguments).unwrap();
             let start_time = Instant::now();
 
             loop {
-                let elapsed_time = Instant::now() - start_time;
-
-                if elapsed_time < Duration::from_secs(arguments.duration) {
+                if Instant::now() - start_time < Duration::from_secs(arguments.duration) {
                     let response_start_time = Instant::now();
                     let response = http_client.call();
                     let elapsed_response_time = Instant::now() - response_start_time;
@@ -53,6 +51,4 @@ fn main() {
 
     Logger::show_overview(&arguments, storage.clone());
     Logger::show_results(storage);
-
-    //TODO: application don't exit automatically
 }

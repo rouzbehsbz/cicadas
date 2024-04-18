@@ -5,7 +5,7 @@ use reqwest::{
 };
 use std::path::PathBuf;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Arguments {
     pub target: String,
     pub method: Method,

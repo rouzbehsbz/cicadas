@@ -22,8 +22,6 @@ fn main() {
     let http_client = HttpClientBlocking::from_arguments(&arguments).unwrap();
     let storage = Arc::new(Storage::new());
 
-    Logger::start();
-
     for _ in 0..arguments.connections {
         let http_client = http_client.clone();
         let storage = storage.clone();
@@ -53,5 +51,6 @@ fn main() {
 
     ThreadPool::wait_execution(thread_pool);
 
-    Logger::show_results(storage, arguments.duration);
+    Logger::show_overview(&arguments, storage.clone());
+    Logger::show_results(storage);
 }

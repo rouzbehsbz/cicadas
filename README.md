@@ -1,6 +1,6 @@
 # Cicadas
 
-Cicadas is a multi threaded HTTP load testing and benchmarking tool written in Rust and it's highly inspired by [wrk](). some limitations on wrk and other open source benchmarking tools, make me write my own version with features I needed. Checkout features section, maybe this is the one you're looking for.
+Cicadas is a multi threaded HTTP load testing and benchmarking tool written in Rust and it's highly inspired by [wrk](https://github.com/wg/wrk). some limitations on wrk and other open source benchmarking tools, make me write my own version with features I needed. Checkout features section, maybe this is the one you're looking for.
 
 -   [Installation](#installation)
 -   [Features](#features)

@@ -10,7 +10,7 @@ Cicadas is a multi threaded HTTP load testing and benchmarking tool written in R
 
 ## Installation
 
-Currently working on automation releases. for now you need to compile source code for your desire platfome/arch using `cargo`.
+Working on automation releases. for now you need to compile source code for your desire platfome/arch using `cargo`.
 
 ## Features
 

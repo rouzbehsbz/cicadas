@@ -25,8 +25,10 @@ Currently working on automation releases. for now you need to compile source cod
 This is how you can simply use cicadas to load test `https://example.com` for `10 seconds` with `8` connections.
 
 ```bash
-cicadas -t https://example.com -m GET -d 10 -c 8
+cicadas -t http://localhost:5500 -m GET -d 30 -c 100
 ```
+
+![response](assets/example_response.png)
 
 ## Options
 

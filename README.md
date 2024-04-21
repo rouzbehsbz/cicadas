@@ -28,7 +28,7 @@ This is how you can simply use cicadas to load test `https://example.com` for `1
 cicadas -t http://localhost:5500 -m GET -d 30 -c 100
 ```
 
-![response](assets/example_response.png)
+![response](assets/response.png)
 
 ## Options
 

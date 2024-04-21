@@ -106,6 +106,7 @@ cicadas -t https://example.com \
 ## Todos
 
 -   [ ] Add ‍‍‍‍`deviation` and `percentile` analysis parameters.
+-   [ ] Add `async` and non blocking version of HTTP client.
 -   [ ] Add an option for specifying file path to store HTTP responses.
 -   [ ] Add an option for pass proxy authorization parameters.
 -   [ ] Compare performance with other tools like `wrk` and `autocannon`

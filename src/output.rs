@@ -27,7 +27,9 @@ where
         Self { buffer, writer }
     }
 
-    pub fn write(storage: Arc<Storage>) {}
+    pub fn write(storage: Arc<Storage>) {
+        //TODO: implement write method
+    }
 
     pub fn flush(&mut self) -> AppResult<()> {
         self.writer.flush(self.buffer.as_bytes())
@@ -42,6 +44,7 @@ impl FileManager {
     pub fn new(path: PathBuf) -> AppResult<Self> {
         let file = match File::create(path) {
             Ok(file) => file,
+            //TODO: handle invalid error here
             Err(_) => return Err(ErrorType::InvalidError),
         };
 
@@ -53,6 +56,7 @@ impl Flushable for FileManager {
     fn flush(&mut self, buffer: &[u8]) -> AppResult<()> {
         match self.file.write(buffer) {
             Ok(_) => Ok(()),
+            //TODO: handle invalid error here
             Err(_) => Err(ErrorType::InvalidError),
         }
     }

@@ -13,6 +13,7 @@ mod app;
 mod errors;
 mod http;
 mod logger;
+mod output;
 mod pool;
 mod storage;
 
